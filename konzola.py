@@ -11,27 +11,52 @@ class Konzola:
     def spusti(self):
 
         while True:
-            print("=" * 40)
-            print("EVIDENCIA POISTENÝCH".center(40))
-            print("=" * 40)
-            print("1. Pridať poisteného")
-            print("2. Zobraziť všetkých poistených")
-            print("3. Vyhľadať poisteného")
-            print("4. Ukončiť program")
+            self.vypis_menu()
             volba = input("Zvoľte možnosť: ").strip()
 
-            if volba == "1":
-                self.pridaj_poisteneho()
-            elif volba == "2":
-                print("\n--- Zoznam poistených ---")
-                print(self.evidencia.vypis_vsetkych(), "\n")
-            elif volba == "3":
-                self.vyhladaj_poisteneho()
-            elif volba == "4":
-                print("Koniec programu.")
-                break
+            akcie = {
+                "1": self.pridaj_poisteneho,
+                "2": self.vypis_poistenych,
+                "3": self.vyhladaj_poisteneho,
+                "4": self.ukoncit_program
+            }
+
+            akcia = akcie.get(volba)
+            if akcia:
+                akcia()
             else:
                 print("Neplatná voľba.\n")
+
+
+
+    def vypis_menu(self):
+
+        print("=" * 40)
+        print("EVIDENCIA POISTENÝCH".center(40))
+        print("=" * 40)
+        print("1. Pridať poisteného")
+        print("2. Zobraziť všetkých poistených")
+        print("3. Vyhľadať poisteného")
+        print("4. Ukončiť program")
+
+    def nacitaj_text(self, prompt):
+        """Načíta textový vstup."""
+        while True:
+            hodnota = input(f"{prompt}: ").strip()
+            if hodnota:
+                return hodnota
+            print(f"{prompt} nesmie byť prázdne.\n")
+
+    def nacitaj_cislo(self, prompt, minimum=None, maximum=None):
+        """Načíta celé číslo v danom rozsahu."""
+        while True:
+            try:
+                cislo = int(input(f"{prompt}: ").strip())
+                if (minimum is None or cislo >= minimum) and (maximum is None or cislo <= maximum):
+                    return cislo
+                print(f"Hodnota musí byť medzi {minimum} a {maximum}.")
+            except ValueError:
+                print("Zadajte celé číslo.")
 
     def nacitaj_telefon(self):
         """Overí, že číslo obsahuje presne 10 číslic."""
@@ -42,29 +67,34 @@ class Konzola:
                 return cisla
             print("Formát čísla je nesprávny – zadajte presne 10 číslic.\n")
 
+
+
     def pridaj_poisteneho(self):
         """Načíta údaje o poistenom a pridá ho do evidencie."""
         print("\n--- Pridanie poisteného ---")
-        meno = input("Meno: ").strip()
-        priezvisko = input("Priezvisko: ").strip()
-
-        while True:
-            try:
-                vek = int(input("Vek: ").strip())
-                if 0 < vek <= 120:
-                    break
-                print("Vek musí byť číslo od 1 do 120.")
-            except ValueError:
-                print("Zadajte celé číslo.")
-
+        meno = self.nacitaj_text("Meno")
+        priezvisko = self.nacitaj_text("Priezvisko")
+        vek = self.nacitaj_cislo("Vek", 1, 120)
         telefon = self.nacitaj_telefon()
 
         poisteny = Poisteny(meno, priezvisko, vek, telefon)
         self.evidencia.pridaj_poisteneho(poisteny)
         print("\n Poistený bol pridaný!\n")
 
+    def vypis_poistenych(self):
+        """Vypíše všetkých poistených."""
+        print("\n--- Zoznam poistených ---")
+        print(self.evidencia.vypis_vsetkych(), "\n")
+
     def vyhladaj_poisteneho(self):
-        meno = input("Zadajte meno: ").strip()
-        priezvisko = input("Zadajte priezvisko: ").strip()
+        """Vyhľadá poisteného podľa mena a priezviska."""
+        print("\n--- Vyhľadávanie poisteného ---")
+        meno = self.nacitaj_text("Meno")
+        priezvisko = self.nacitaj_text("Priezvisko")
         print("\n--- Výsledok vyhľadávania ---")
         print(self.evidencia.vyhladaj_poisteneho(meno, priezvisko), "\n")
+
+    def ukoncit_program(self):
+        """Ukončí aplikáciu."""
+        print("Koniec programu.")
+        exit()
